@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Associação Cultural e Recreativa dos Moradores de Almargem</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-circle-header">
+                    <img src="logo.svg" alt="ACRDM">
+                </div>
+                <div>
+                    <h1>Associação Cultural e Recreativa dos Moradores de Almargem</h1>
+                    <p>Comunidade, Cultura e Tradição</p>
+                </div>
+                            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul class="nav-tabs">
+                <li class="nav-item active" data-tab="contactos">
+                    <i class="fas fa-address-book"></i> Contactos
+                </li>
+                <li class="nav-item" data-tab="relatorios">
+                    <i class="fas fa-file-invoice-dollar"></i> Relatórios
+                </li>
+                <li class="nav-item" data-tab="publicacoes">
+                    <i class="fas fa-images"></i> Publicações
+                </li>
+                <li class="nav-item" data-tab="socios">
+                    <i class="fas fa-users"></i> Sócios
+                </li>
+                <li class="nav-item" data-tab="reservas">
+                    <i class="fas fa-utensils"></i> Reservas
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Separador de Contactos -->
+        <section id="contactos" class="tab-content">
+            <div class="contact-header">
+                <h2>Contactos e Redes Sociais</h2>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email</h3>
+                    <p>ACRDM_ALMARGEM@HOTMAIL.COM</p>
+                    <a href="mailto:ACRDM_ALMARGEM@HOTMAIL.COM" class="btn">Enviar Email</a>
+                </div>
+                <div class="contact-card">
+                    <i class="fab fa-facebook"></i>
+                    <h3>Facebook</h3>
+                    <p>Almargem.2026</p>
+                    <a href="https://www.facebook.com/profile.php?id=61577468277679" target="_blank" class="btn">Visitar Página</a>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Localização</h3>
+                    <p>Almargem, Portugal</p>
+                    <a href="https://maps.app.goo.gl/y8bz143Ach9k6ieVA" target="_blank" class="btn">Ver no Mapa</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Separador de Relatórios -->
+        <section id="relatorios" class="tab-content">
+            <h2>Relatórios de Contas Mensais</h2>
+            <div class="reports-container">
+                <div class="report-controls">
+                    <select id="monthSelect">
+                        <option value="">Selecione um mês</option>
+                        <option value="2026-01">Janeiro 2026</option>
+                        <option value="2026-02">Fevereiro 2026</option>
+                        <option value="2026-03">Março 2026</option>
+                        <option value="2026-04">Abril 2026</option>
+                    </select>
+                    <button id="addReport" class="btn">Novo Balancete</button>
+                    <button id="importPDF" class="btn">Importar PDF</button>
+                </div>
+                <div id="reportsList" class="reports-list">
+                    <!-- Relatórios serão adicionados aqui -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal para Novo Balancete -->
+        <div id="balanceteModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Novo Balancete Mensal</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="balanceteForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Mês/Ano:</label>
+                                <input type="month" id="balanceteMonth" required>
+                            </div>
+                        </div>
+                        
+                        <div class="balancete-section">
+                            <h4>Receitas</h4>
+                            <div class="balancete-grid">
+                                <div class="form-group">
+                                    <label>Quotas de Sócios:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Eventos e Festas:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Bar/Restaurante:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Subsídios/Donativos:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Outras Receitas:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Total Receitas:</label>
+                                    <input type="number" id="totalReceitas" readonly class="total-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="balancete-section">
+                            <h4>Despesas</h4>
+                            <div class="balancete-grid">
+                                <div class="form-group">
+                                    <label>Água e Luz:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Telefone/Internet:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Aluguer/Financiamento:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Limpeza e Manutenção:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Eventos e Desportos:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Seguros:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Honorários/Contabilidade:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Material de Escritório:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Outras Despesas:</label>
+                                    <input type="number" class="valor-input" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Total Despesas:</label>
+                                    <input type="number" id="totalDespesas" readonly class="total-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="balancete-summary">
+                            <div class="summary-row">
+                                <label>Saldo do Mês:</label>
+                                <input type="number" id="saldoMes" readonly class="saldo-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Observações:</label>
+                                <textarea id="balanceteObservacoes" rows="3" placeholder="Observações adicionais..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Salvar Balancete</button>
+                            <button type="button" class="btn btn-secondary" id="cancelBalancete">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Importar PDF -->
+        <div id="pdfModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Importar PDF de Balancete</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="pdfForm">
+                        <div class="form-group">
+                            <label>Selecione o ficheiro PDF:</label>
+                            <input type="file" id="pdfFile" accept=".pdf" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mês/Ano do relatório:</label>
+                            <input type="month" id="pdfMonth" required>
+                        </div>
+                        <div class="pdf-info">
+                            <p><strong>Nota:</strong> O PDF será armazenado e poderá ser visualizado pelos sócios.</p>
+                            <p>Para dados estruturados, use a opção "Novo Balancete".</p>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Importar PDF</button>
+                            <button type="button" class="btn btn-secondary" id="cancelPDF">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Separador de Publicações -->
+        <section id="publicacoes" class="tab-content">
+            <h2>Publicações</h2>
+            <div class="publicacoes-container">
+                <div class="add-publicacao">
+                    <h3>Adicionar Nova Publicação</h3>
+                    <form id="publicacaoForm">
+                        <input type="text" id="publicacaoTitle" placeholder="Título da publicação" required>
+                        <textarea id="publicacaoDescription" placeholder="Descrição" rows="3"></textarea>
+                        <input type="file" id="publicacaoImage" accept="image/*">
+                        <button type="submit" class="btn">Publicar</button>
+                    </form>
+                </div>
+                <div id="publicacoesList" class="publicacoes-grid">
+                    <!-- Publicações serão adicionadas aqui -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Separador de Sócios -->
+        <section id="socios" class="tab-content">
+            <h2>Gestão de Sócios</h2>
+            
+            <!-- Área de Adesão de Novos Sócios -->
+            <div class="adesao-container">
+                <h3>Queres ser sócio? Preenche o formulário de adesão!</h3>
+                <p>Ao preencher este formulário, receberás automaticamente por email o teu formulário de sócio em PDF para poderes efetuar o pagamento da quota anual de 12€.</p>
+                
+                <form id="adesaoForm" class="adesao-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nomeCompleto">Nome Completo *</label>
+                            <input type="text" id="nomeCompleto" name="nomeCompleto" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataNascimento">Data de Nascimento *</label>
+                            <input type="date" id="dataNascimento" name="dataNascimento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contribuinte">Nº Contribuinte *</label>
+                            <input type="text" id="contribuinte" name="contribuinte" pattern="[0-9]{9}" maxlength="9" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefone">Telefone</label>
+                            <input type="tel" id="telefone" name="telefone">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="morada">Morada</label>
+                            <input type="text" id="morada" name="morada">
+                        </div>
+                        <div class="form-group">
+                            <label for="codigoPostal">Código Postal</label>
+                            <input type="text" id="codigoPostal" name="codigoPostal" pattern="[0-9]{4}-[0-9]{3}" placeholder="0000-000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="termos" required>
+                            Declaro que li e aceito os estatutos da associação e autorizo o tratamento dos meus dados para fins associativos.
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn">Enviar Formulário</button>
+                        <button type="reset" class="btn btn-secondary">Limpar</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Área de Lista de Sócios Existente -->
+            <div class="socios-container">
+                <h3>Sócios Atuais</h3>
+                <div class="socios-controls">
+                    <button class="btn" id="addSocio">Adicionar Sócio Manualmente</button>
+                    <input type="text" id="searchSocio" placeholder="Pesquisar sócio...">
+                </div>
+                <div id="sociosList" class="socios-list">
+                    <!-- Lista de sócios será adicionada aqui -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Separador de Reservas -->
+        <section id="reservas" class="tab-content">
+            <h2>Reservas de Comida</h2>
+            <div class="reservas-container">
+                <div class="reserva-form">
+                    <h3>Fazer Reserva</h3>
+                    <form id="reservaForm">
+                        <div class="form-group">
+                            <label for="nomeReserva">Nome:</label>
+                            <input type="text" id="nomeReserva" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefoneReserva">Telefone:</label>
+                            <input type="tel" id="telefoneReserva" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dataReserva">Data:</label>
+                            <input type="date" id="dataReserva" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pratoReserva">Prato:</label>
+                            <select id="pratoReserva" required>
+                                <option value="">Selecione um prato</option>
+                                <option value="bacalhau">Bacalhau à Brás</option>
+                                <option value="frango">Frango no Churrasco</option>
+                                <option value="carne">Carne de Porco Alentejana</option>
+                                <option value="peixe">Peixe Grelhado</option>
+                                <option value="vegetariano">Opção Vegetariana</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantidadeReserva">Quantidade:</label>
+                            <input type="number" id="quantidadeReserva" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="observacoesReserva">Observações:</label>
+                            <textarea id="observacoesReserva" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn">Fazer Reserva</button>
+                    </form>
+                </div>
+                <div class="reservas-list">
+                    <h3>Reservas Atuais</h3>
+                    <div id="reservasList">
+                        <!-- Reservas serão adicionadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Associação Cultural e Recreativa dos Moradores de Almargem</p>
+            <p>NIF: 502197463 | Email: ACRDM_ALMARGEM@HOTMAIL.COM</p>
+        </div>
+    </footer>
+
+    <script src="pdf-generator.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

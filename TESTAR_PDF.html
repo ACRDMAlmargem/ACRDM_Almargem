@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testar Funcionalidade PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Testar Funcionalidade PDF</h1>
+        <p>Esta página serve para testar se a funcionalidade de PDF está a funcionar corretamente.</p>
+        
+        <h2>Teste 1: Importar PDF</h2>
+        <input type="file" id="testPdfFile" accept=".pdf">
+        <button class="btn" onclick="testImportPDF()">Importar PDF</button>
+        
+        <h2>Teste 2: Ver PDF</h2>
+        <button class="btn" onclick="testViewPDF()">Ver PDF Importado</button>
+        
+        <h2>Teste 3: Download PDF</h2>
+        <button class="btn" onclick="testDownloadPDF()">Download PDF</button>
+        
+        <h2>Teste 4: Limpar Dados</h2>
+        <button class="btn" onclick="clearTestData()">Limpar Dados de Teste</button>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function showResult(message, type = 'success') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="${type}">${message}</div>`;
+            resultDiv.style.display = 'block';
+        }
+
+        function testImportPDF() {
+            const fileInput = document.getElementById('testPdfFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('Por favor, selecione um ficheiro PDF primeiro', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const testData = {
+                    id: Date.now(),
+                    type: 'pdf',
+                    month: '2024-04',
+                    fileName: file.name,
+                    fileSize: file.size,
+                    data: e.target.result,
+                    date: new Date().toISOString()
+                };
+                
+                // Guardar no localStorage
+                const existingData = JSON.parse(localStorage.getItem('testPdfData') || '[]');
+                existingData.push(testData);
+                localStorage.setItem('testPdfData', JSON.stringify(existingData));
+                
+                showResult(`PDF "${file.name}" importado com sucesso! Tamanho: ${(file.size / 1024).toFixed(2)} KB`, 'success');
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function testViewPDF() {
+            const testData = JSON.parse(localStorage.getItem('testPdfData') || '[]');
+            
+            if (testData.length === 0) {
+                showResult('Nenhum PDF importado para testar', 'error');
+                return;
+            }
+            
+            const lastPdf = testData[testData.length - 1];
+            
+            try {
+                // Criar um blob a partir do data URL
+                const base64Data = lastPdf.data.split(',')[1];
+                const binaryData = atob(base64Data);
+                const bytes = new Uint8Array(binaryData.length);
+                
+                for (let i = 0; i < binaryData.length; i++) {
+                    bytes[i] = binaryData.charCodeAt(i);
+                }
+                
+                const blob = new Blob([bytes], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(blob);
+                
+                // Abrir em nova janela
+                const newWindow = window.open(pdfUrl, '_blank');
+                
+                if (newWindow) {
+                    showResult('PDF aberto em nova janela! Verifique se o conteúdo aparece corretamente.', 'success');
+                } else {
+                    showResult('Não foi possível abrir nova janela. Verifique as configurações do navegador.', 'error');
+                }
+                
+                // Limpar o URL object após a janela abrir
+                setTimeout(() => {
+                    URL.revokeObjectURL(pdfUrl);
+                }, 1000);
+                
+            } catch (error) {
+                showResult(`Erro ao abrir PDF: ${error.message}`, 'error');
+                console.error('PDF View Error:', error);
+            }
+        }
+
+        function testDownloadPDF() {
+            const testData = JSON.parse(localStorage.getItem('testPdfData') || '[]');
+            
+            if (testData.length === 0) {
+                showResult('Nenhum PDF importado para testar', 'error');
+                return;
+            }
+            
+            const lastPdf = testData[testData.length - 1];
+            
+            try {
+                // Criar um blob para download
+                const base64Data = lastPdf.data.split(',')[1];
+                const binaryData = atob(base64Data);
+                const bytes = new Uint8Array(binaryData.length);
+                
+                for (let i = 0; i < binaryData.length; i++) {
+                    bytes[i] = binaryData.charCodeAt(i);
+                }
+                
+                const blob = new Blob([bytes], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = pdfUrl;
+                link.download = lastPdf.fileName;
+                link.click();
+                
+                // Limpar o URL object
+                setTimeout(() => {
+                    URL.revokeObjectURL(pdfUrl);
+                }, 1000);
+                
+                showResult('Download iniciado! Verifique a pasta de downloads.', 'success');
+                
+            } catch (error) {
+                showResult(`Erro ao fazer download: ${error.message}`, 'error');
+                console.error('PDF Download Error:', error);
+            }
+        }
+
+        function clearTestData() {
+            localStorage.removeItem('testPdfData');
+            showResult('Dados de teste limpos com sucesso!', 'success');
+        }
+
+        // Mostrar PDFs importados
+        function showImportedPDFs() {
+            const testData = JSON.parse(localStorage.getItem('testPdfData') || '[]');
+            
+            if (testData.length > 0) {
+                let list = '<h3>PDFs Importados:</h3><ul>';
+                testData.forEach(pdf => {
+                    list += `<li>${pdf.fileName} (${(pdf.fileSize / 1024).toFixed(2)} KB)</li>`;
+                });
+                list += '</ul>';
+                showResult(list, 'success');
+            }
+        }
+
+        // Mostrar PDFs ao carregar a página
+        window.onload = function() {
+            showImportedPDFs();
+        };
+    </script>
+</body>
+</html>
