@@ -12,11 +12,11 @@
   </defs>
   
   <!-- Background Circle -->
-  <circle cx="100" cy="100" r="95" fill="url(#greenGradient)" opacity="0.1"/>
-  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#greenGradient)" stroke-width="2"/>
+  <circle cx="50" cy="50" r="45" fill="url(#greenGradient)" opacity="0.1"/>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="url(#greenGradient)" stroke-width="2"/>
   
   <!-- Tree/Community Symbol -->
-  <g transform="translate(100, 100)">
+  <g transform="translate(50, 50)">
     <!-- Tree Trunk -->
     <rect x="-8" y="10" width="16" height="30" fill="url(#accentGradient)" rx="2"/>
     
@@ -50,10 +50,10 @@
   </g>
   
   <!-- Text -->
-  <text x="100" y="170" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="url(#accentGradient)">
+  <text x="50" y="82" font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="url(#accentGradient)">
     ACRDM
   </text>
-  <text x="100" y="185" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#2E7D32">
+  <text x="50" y="92" font-family="Arial, sans-serif" font-size="7" font-weight="bold" text-anchor="middle" fill="#2E7D32">
     ALMARGEM
   </text>
 </svg>
