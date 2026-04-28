@@ -1,4 +1,4 @@
-// Sistema de// Inicialização quando o DOM estiver carregado
+// Inicialização quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
     initializeTabs();
     initializeReports();
@@ -66,71 +66,23 @@ function loadStoredData() {
 
 // Sistema de Relatórios
 function initializeReports() {
-    const monthSelect = document.getElementById('monthSelect');
-    const addReportBtn = document.getElementById('addReport');
-    const importPDFBtn = document.getElementById('importPDF');
-    const balanceteModal = document.getElementById('balanceteModal');
-    const pdfModal = document.getElementById('pdfModal');
-    const balanceteForm = document.getElementById('balanceteForm');
-    const pdfForm = document.getElementById('pdfForm');
-
-    // Preencher o select com apenas os meses que têm dados
-    populateMonthSelect();
-
-    monthSelect.addEventListener('change', function() {
-        if (this.value) {
-            filterReports(this.value);
-        } else {
-            // Se selecionar "Selecione um mês", mostrar todos
-            displayReports(JSON.parse(localStorage.getItem('reports') || '[]'));
-        }
-    });
-
-    addReportBtn.addEventListener('click', function() {
-        openBalanceteModal();
-    });
-
-    importPDFBtn.addEventListener('click', function() {
-        openPDFModal();
-    });
-
-    // Modal controls
-    document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function() {
-            this.closest('.modal').style.display = 'none';
-        });
-    });
-
-    document.getElementById('cancelBalancete').addEventListener('click', function() {
-        balanceteModal.style.display = 'none';
-    });
-
-    document.getElementById('cancelPDF').addEventListener('click', function() {
-        pdfModal.style.display = 'none';
-    });
-
-    // Form submissions
-    balanceteForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveBalancete();
-    });
-
-    pdfForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        importPDF();
-    });
-
-    // Auto-calculation
-    document.querySelectorAll('.valor-input').forEach(input => {
-        input.addEventListener('input', calculateTotals);
-    });
-
-    // Click outside modal to close
-    window.addEventListener('click', function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = 'none';
-        }
-    });
+    // Mostrar apenas o Balancete - Março 2026
+    const reportsList = document.getElementById('reportsList');
+    
+    if (reportsList) {
+        reportsList.innerHTML = `
+            <div class="report-card">
+                <div class="report-info">
+                    <h4>Balancete - Março 2026</h4>
+                    <p><strong>Data:</strong> 31/03/2026</p>
+                </div>
+                <div class="report-actions">
+                    <button onclick="viewReport('./Balancete.pdf')" class="btn btn-small">Visualizar</button>
+                    <button onclick="downloadReport('Balancete.pdf')" class="btn btn-small btn-secondary">Exportar PDF</button>
+                </div>
+            </div>
+        `;
+    }
 }
 
 function populateMonthSelect() {
@@ -625,15 +577,12 @@ function addComment(publicacaoId) {
 // Sistema de Sócios
 function initializeSocios() {
     const searchInput = document.getElementById('searchSocio');
-    const addSocioBtn = document.getElementById('addSocio');
 
-    searchInput.addEventListener('input', function() {
-        filterSocios(this.value);
-    });
-
-    addSocioBtn.addEventListener('click', function() {
-        addNewSocio();
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            filterSocios(this.value);
+        });
+    }
 
     // Adicionar sócios de exemplo
     addExampleSocios();
@@ -693,9 +642,8 @@ function displaySocios(socios) {
         socioItem.innerHTML = `
             <div class="socio-info">
                 <h4>${socio.name}</h4>
-                <p>Email: ${socio.email}</p>
-                <p>Telefone: ${socio.phone}</p>
-                <p>Data de adesão: ${new Date(socio.joinDate).toLocaleDateString('pt-PT')}</p>
+                <p><strong>Nº Sócio:</strong> ${socio.id || 'N/A'}</p>
+                <p><strong>Data de Adesão:</strong> ${new Date(socio.joinDate).toLocaleDateString('pt-PT')}</p>
             </div>
             <span class="socio-status ${socio.status === 'active' ? 'status-active' : 'status-inactive'}">
                 ${socio.status === 'active' ? 'Ativo' : 'Inativo'}
@@ -705,8 +653,8 @@ function displaySocios(socios) {
     });
 
     // Atualizar estatísticas
-    totalSocios.textContent = socios.length;
-    sociosAtivos.textContent = socios.filter(s => s.status === 'active').length;
+    if (totalSocios) totalSocios.textContent = socios.length;
+    if (sociosAtivos) sociosAtivos.textContent = socios.filter(s => s.status === 'active').length;
 }
 
 function filterSocios(searchTerm) {
@@ -851,6 +799,28 @@ function exportData() {
     linkElement.click();
 }
 
+// Função para visualizar PDF
+function viewReport(fileUrl) {
+    if (fileUrl === './Balancete.pdf') {
+        window.open(fileUrl, '_blank');
+    } else {
+        showMessage('PDF não encontrado', 'error');
+    }
+}
+
+// Função para fazer download do PDF
+function downloadReport(fileName) {
+    if (fileName === 'Balancete.pdf') {
+        const link = document.createElement('a');
+        link.href = './Balancete.pdf';
+        link.download = fileName;
+        link.click();
+        showMessage('Download iniciado', 'success');
+    } else {
+        showMessage('PDF não encontrado', 'error');
+    }
+}
+
 // Limpar dados (funcionalidade adicional)
 function clearData() {
     if (confirm('Tem a certeza que pretende limpar todos os dados? Esta ação não pode ser desfeita.')) {
@@ -898,7 +868,7 @@ function initializeAdesaoForm() {
             let idade = hoje.getFullYear() - dataNasc.getFullYear();
             const mesDiff = hoje.getMonth() - dataNasc.getMonth();
             
-            if (mesDiff < 0 || (mesDiff === 0 && hoje.getDate() < dataNasc.getDate())) {
+            if (mesDiff < 0 || (mesDiff === 0 && hoje.getDate() < dataNascimento.getDate())) {
                 idade--;
             }
             
@@ -907,24 +877,16 @@ function initializeAdesaoForm() {
                 return;
             }
             
-            if (!termos) {
-                alert('É necessário aceitar os termos para prosseguir');
-                return;
-            }
-            
-            // Coletar dados do formulário
-            const dadosSocio = {
-                nomeCompleto,
-                dataNascimento,
-                contribuinte,
-                email,
-                telefone: document.getElementById('telefone').value.trim(),
-                morada: document.getElementById('morada').value.trim(),
-                codigoPostal: document.getElementById('codigoPostal').value.trim()
-            };
-            
-            // Gerar PDF e enviar
             try {
+                // Criar objeto com dados do sócio
+                const dadosSocio = {
+                    nomeCompleto: nomeCompleto,
+                    dataNascimento: dataNascimento,
+                    contribuinte: contribuinte,
+                    email: email,
+                    termos: termos
+                };
+                
                 const pdfHTML = criarFormularioSocio(dadosSocio);
                 const enviado = enviarFormularioPorEmail(dadosSocio, pdfHTML);
                 

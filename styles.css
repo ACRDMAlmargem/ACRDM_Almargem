@@ -704,7 +704,29 @@ main {
 }
 
 /* Sócios */
-.socios-container {
+.socios-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: stretch;
+}
+
+.socios-left {
+    flex: 1;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.socios-divider {
+    width: 3px;
+    background: linear-gradient(to bottom, #347474, #4a8c8c);
+    border-radius: 2px;
+    margin: 0 1rem;
+}
+
+.socios-right {
+    flex: 1;
     background: white;
     padding: 2rem;
     border-radius: 10px;
@@ -725,6 +747,13 @@ main {
     border-radius: 5px;
     font-size: 1rem;
     min-width: 200px;
+}
+
+.socios-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .socios-stats {

@@ -75,19 +75,8 @@
         <section id="relatorios" class="tab-content">
             <h2>Relatórios de Contas Mensais</h2>
             <div class="reports-container">
-                <div class="report-controls">
-                    <select id="monthSelect">
-                        <option value="">Selecione um mês</option>
-                        <option value="2026-01">Janeiro 2026</option>
-                        <option value="2026-02">Fevereiro 2026</option>
-                        <option value="2026-03">Março 2026</option>
-                        <option value="2026-04">Abril 2026</option>
-                    </select>
-                    <button id="addReport" class="btn">Novo Balancete</button>
-                    <button id="importPDF" class="btn">Importar PDF</button>
-                </div>
                 <div id="reportsList" class="reports-list">
-                    <!-- Relatórios serão adicionados aqui -->
+                    <!-- Apenas mostrar o Balancete - Março 2026 -->
                 </div>
             </div>
         </section>
@@ -257,75 +246,79 @@
         <section id="socios" class="tab-content">
             <h2>Gestão de Sócios</h2>
             
-            <!-- Área de Adesão de Novos Sócios -->
-            <div class="adesao-container">
-                <h3>Queres ser sócio? Preenche o formulário de adesão!</h3>
-                <p>Ao preencher este formulário, receberás automaticamente por email o teu formulário de sócio em PDF para poderes efetuar o pagamento da quota anual de 12€.</p>
-                
-                <form id="adesaoForm" class="adesao-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nomeCompleto">Nome Completo *</label>
-                            <input type="text" id="nomeCompleto" name="nomeCompleto" required>
-                        </div>
-                    </div>
+            <div class="socios-layout">
+                <!-- Lado Esquerdo: Formulário de Adesão -->
+                <div class="socios-left">
+                    <h3>Queres ser sócio? Preenche o formulário de adesão!</h3>
+                    <p>Ao preencher este formulário, receberás automaticamente por email o teu formulário de sócio em PDF para poderes efetuar o pagamento da quota anual de 12€.</p>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dataNascimento">Data de Nascimento *</label>
-                            <input type="date" id="dataNascimento" name="dataNascimento" required>
+                    <form id="adesaoForm" class="adesao-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nomeCompleto">Nome Completo *</label>
+                                <input type="text" id="nomeCompleto" name="nomeCompleto" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="contribuinte">Nº Contribuinte *</label>
-                            <input type="text" id="contribuinte" name="contribuinte" pattern="[0-9]{9}" maxlength="9" required>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dataNascimento">Data de Nascimento *</label>
+                                <input type="date" id="dataNascimento" name="dataNascimento" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contribuinte">Nº Contribuinte *</label>
+                                <input type="text" id="contribuinte" name="contribuinte" pattern="[0-9]{9}" maxlength="9" required>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" required>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input type="tel" id="telefone" name="telefone">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="telefone">Telefone</label>
-                            <input type="tel" id="telefone" name="telefone">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="morada">Morada</label>
+                                <input type="text" id="morada" name="morada">
+                            </div>
+                            <div class="form-group">
+                                <label for="codigoPostal">Código Postal</label>
+                                <input type="text" id="codigoPostal" name="codigoPostal" pattern="[0-9]{4}-[0-9]{3}" placeholder="0000-000">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-row">
+                        
                         <div class="form-group">
-                            <label for="morada">Morada</label>
-                            <input type="text" id="morada" name="morada">
+                            <label>
+                                <input type="checkbox" id="termos" required>
+                                Declaro que li e aceito os estatutos da associação e autorizo o tratamento dos meus dados para fins associativos.
+                            </label>
                         </div>
-                        <div class="form-group">
-                            <label for="codigoPostal">Código Postal</label>
-                            <input type="text" id="codigoPostal" name="codigoPostal" pattern="[0-9]{4}-[0-9]{3}" placeholder="0000-000">
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Enviar Formulário</button>
+                            <button type="reset" class="btn btn-secondary">Limpar</button>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="termos" required>
-                            Declaro que li e aceito os estatutos da associação e autorizo o tratamento dos meus dados para fins associativos.
-                        </label>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn">Enviar Formulário</button>
-                        <button type="reset" class="btn btn-secondary">Limpar</button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Área de Lista de Sócios Existente -->
-            <div class="socios-container">
-                <h3>Sócios Atuais</h3>
-                <div class="socios-controls">
-                    <button class="btn" id="addSocio">Adicionar Sócio Manualmente</button>
-                    <input type="text" id="searchSocio" placeholder="Pesquisar sócio...">
+                    </form>
                 </div>
-                <div id="sociosList" class="socios-list">
-                    <!-- Lista de sócios será adicionada aqui -->
+                
+                <!-- Linha Verde Separadora -->
+                <div class="socios-divider"></div>
+                
+                <!-- Lado Direito: Lista de Sócios -->
+                <div class="socios-right">
+                    <h3>Sócios Atuais</h3>
+                    <div class="socios-controls">
+                        <input type="text" id="searchSocio" placeholder="Pesquisar sócio...">
+                    </div>
+                    <div id="sociosList" class="socios-list">
+                        <!-- Lista de sócios será adicionada aqui -->
+                    </div>
                 </div>
             </div>
         </section>
