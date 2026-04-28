@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSocios();
     initializeReservas();
     initializeAdesaoForm();
+    initializeAdministration();
+    checkAdminStatus();
 });
 
 // Sistema de abas
@@ -818,6 +820,346 @@ function downloadReport(fileName) {
         showMessage('Download iniciado', 'success');
     } else {
         showMessage('PDF não encontrado', 'error');
+    }
+}
+
+// Sistema de Administração
+function initializeAdministration() {
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    const adminLogoutBtn = document.getElementById('adminLogout');
+    const adminLogoutHeaderBtn = document.getElementById('adminLogoutBtn');
+    const adminLoginHeaderBtn = document.getElementById('adminLoginBtn');
+    const saveConfigBtn = document.getElementById('saveConfig');
+    const pdfUploadForm = document.getElementById('pdfUploadForm');
+
+    // Login de administrador
+    if (adminLoginForm) {
+        adminLoginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (username === 'admin' && password === 'acrdm2026') {
+                localStorage.setItem('isAdmin', 'true');
+                showAdminPanel();
+                showMessage('Login realizado com sucesso!', 'success');
+            } else {
+                showMessage('Credenciais inválidas!', 'error');
+            }
+        });
+    }
+
+    // Logout de administrador (painel)
+    if (adminLogoutBtn) {
+        adminLogoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('isAdmin');
+            hideAdminPanel();
+            checkAdminStatus();
+            showMessage('Logout realizado com sucesso!', 'success');
+        });
+    }
+
+    // Login de administrador (header)
+    if (adminLoginHeaderBtn) {
+        adminLoginHeaderBtn.addEventListener('click', function() {
+            showLoginModal();
+        });
+    }
+
+    // Logout de administrador (header)
+    if (adminLogoutHeaderBtn) {
+        adminLogoutHeaderBtn.addEventListener('click', function() {
+            localStorage.removeItem('isAdmin');
+            hideAdminPanel();
+            checkAdminStatus();
+            showMessage('Logout realizado com sucesso!', 'success');
+        });
+    }
+
+    // Guardar configurações
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', saveTabConfigurations);
+    }
+
+    // Upload de PDF
+    if (pdfUploadForm) {
+        pdfUploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            uploadPDF();
+        });
+    }
+}
+
+function checkAdminStatus() {
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    
+    // Mostrar botões de login/logout no header
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+    
+    if (adminLoginBtn && adminLogoutBtn) {
+        if (isAdmin) {
+            adminLoginBtn.style.display = 'none';
+            adminLogoutBtn.style.display = 'block';
+        } else {
+            adminLoginBtn.style.display = 'block';
+            adminLogoutBtn.style.display = 'none';
+        }
+    }
+    
+    if (isAdmin) {
+        showAdminPanel();
+    }
+    loadTabConfigurations();
+    loadUploadedPDFs();
+}
+
+function showAdminPanel() {
+    const adminLogin = document.getElementById('adminLogin');
+    const adminPanel = document.getElementById('adminPanel');
+    const adminOnlyItems = document.querySelectorAll('.admin-only');
+
+    if (adminLogin) adminLogin.style.display = 'none';
+    if (adminPanel) adminPanel.style.display = 'block';
+    
+    adminOnlyItems.forEach(item => {
+        item.style.display = 'block';
+    });
+}
+
+function hideAdminPanel() {
+    const adminLogin = document.getElementById('adminLogin');
+    const adminPanel = document.getElementById('adminPanel');
+    const adminOnlyItems = document.querySelectorAll('.admin-only');
+
+    if (adminLogin) adminLogin.style.display = 'block';
+    if (adminPanel) adminPanel.style.display = 'none';
+    
+    adminOnlyItems.forEach(item => {
+        if (!item.id || !item.id.includes('adminLoginBtn') && !item.id.includes('adminLogoutBtn')) {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function showLoginModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Login de Administrador</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="modalAdminLoginForm">
+                    <div class="form-group">
+                        <label for="modalUsername">Utilizador:</label>
+                        <input type="text" id="modalUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalPassword">Password:</label>
+                        <input type="password" id="modalPassword" required>
+                    </div>
+                    <button type="submit" class="btn">Entrar</button>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.style.display = 'block';
+    
+    // Event listeners
+    const closeBtn = modal.querySelector('.close-modal');
+    const form = modal.querySelector('#modalAdminLoginForm');
+    
+    closeBtn.addEventListener('click', function() {
+        document.body.removeChild(modal);
+    });
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('modalUsername').value;
+        const password = document.getElementById('modalPassword').value;
+        
+        if (username === 'admin' && password === 'acrdm2026') {
+            localStorage.setItem('isAdmin', 'true');
+            showAdminPanel();
+            checkAdminStatus();
+            document.body.removeChild(modal);
+            showMessage('Login realizado com sucesso!', 'success');
+            
+            // Abrir separador de administração
+            const adminTab = document.querySelector('[data-tab="administracao"]');
+            if (adminTab) {
+                adminTab.click();
+            }
+        } else {
+            showMessage('Credenciais inválidas!', 'error');
+        }
+    });
+}
+
+function saveTabConfigurations() {
+    const config = {
+        relatorios: document.getElementById('toggleRelatorios').checked,
+        publicacoes: document.getElementById('togglePublicacoes').checked,
+        socios: document.getElementById('toggleSocios').checked,
+        reservas: document.getElementById('toggleReservas').checked
+    };
+
+    localStorage.setItem('tabConfig', JSON.stringify(config));
+    applyTabConfigurations(config);
+    showMessage('Configurações guardadas com sucesso!', 'success');
+}
+
+function loadTabConfigurations() {
+    const savedConfig = localStorage.getItem('tabConfig');
+    if (savedConfig) {
+        const config = JSON.parse(savedConfig);
+        
+        document.getElementById('toggleRelatorios').checked = config.relatorios !== false;
+        document.getElementById('togglePublicacoes').checked = config.publicacoes !== false;
+        document.getElementById('toggleSocios').checked = config.socios !== false;
+        document.getElementById('toggleReservas').checked = config.reservas !== false;
+        
+        applyTabConfigurations(config);
+    } else {
+        // Configuração padrão
+        const defaultConfig = {
+            relatorios: true,
+            publicacoes: true,
+            socios: true,
+            reservas: false
+        };
+        
+        document.getElementById('toggleRelatorios').checked = defaultConfig.relatorios;
+        document.getElementById('togglePublicacoes').checked = defaultConfig.publicacoes;
+        document.getElementById('toggleSocios').checked = defaultConfig.socios;
+        document.getElementById('toggleReservas').checked = defaultConfig.reservas;
+        
+        applyTabConfigurations(defaultConfig);
+    }
+}
+
+function applyTabConfigurations(config) {
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    
+    if (!isAdmin) {
+        const tabs = {
+            relatorios: document.querySelector('[data-tab="relatorios"]'),
+            publicacoes: document.querySelector('[data-tab="publicacoes"]'),
+            socios: document.querySelector('[data-tab="socios"]'),
+            reservas: document.querySelector('[data-tab="reservas"]')
+        };
+
+        Object.keys(tabs).forEach(tabName => {
+            if (tabs[tabName]) {
+                tabs[tabName].style.display = config[tabName] ? 'block' : 'none';
+            }
+        });
+    }
+}
+
+function uploadPDF() {
+    const tipo = document.getElementById('pdfTipo').value;
+    const mes = document.getElementById('pdfMes').value;
+    const ano = document.getElementById('pdfAno').value;
+    const pdfFile = document.getElementById('pdfFile').files[0];
+
+    if (!tipo || !mes || !ano || !pdfFile) {
+        showMessage('Por favor, preencha todos os campos obrigatórios!', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const pdfData = {
+            id: Date.now(),
+            tipo: tipo,
+            mes: mes,
+            ano: ano,
+            nome: pdfFile.name,
+            data: e.target.result,
+            dataUpload: new Date().toISOString()
+        };
+
+        const pdfs = JSON.parse(localStorage.getItem('uploadedPDFs') || '[]');
+        pdfs.push(pdfData);
+        localStorage.setItem('uploadedPDFs', JSON.stringify(pdfs));
+
+        document.getElementById('pdfUploadForm').reset();
+        loadUploadedPDFs();
+        showMessage('PDF carregado com sucesso!', 'success');
+    };
+
+    reader.readAsDataURL(pdfFile);
+}
+
+function loadUploadedPDFs() {
+    const pdfs = JSON.parse(localStorage.getItem('uploadedPDFs') || '[]');
+    const pdfsList = document.getElementById('pdfsList');
+    
+    if (pdfsList) {
+        pdfsList.innerHTML = '';
+        
+        pdfs.sort((a, b) => new Date(b.dataUpload) - new Date(a.dataUpload));
+        
+        pdfs.forEach(pdf => {
+            const pdfItem = document.createElement('div');
+            pdfItem.className = 'pdf-item';
+            
+            const tipoText = pdf.tipo === 'balancete' ? 'Balancete' : 'Relatório Anual';
+            const mesText = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][parseInt(pdf.mes)];
+            
+            pdfItem.innerHTML = `
+                <div>
+                    <strong>${tipoText} - ${mesText} ${pdf.ano}</strong>
+                    <br><small>${pdf.nome}</small>
+                </div>
+                <div>
+                    <button onclick="viewUploadedPDF('${pdf.id}')" class="btn btn-small">Visualizar</button>
+                    <button onclick="deleteUploadedPDF('${pdf.id}')" class="btn btn-small btn-danger">Eliminar</button>
+                </div>
+            `;
+            
+            pdfsList.appendChild(pdfItem);
+        });
+    }
+}
+
+function viewUploadedPDF(pdfId) {
+    const pdfs = JSON.parse(localStorage.getItem('uploadedPDFs') || '[]');
+    const pdf = pdfs.find(p => p.id == pdfId);
+    
+    if (pdf) {
+        const byteCharacters = atob(pdf.data.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        
+        window.open(url, '_blank');
+    }
+}
+
+function deleteUploadedPDF(pdfId) {
+    if (confirm('Tem certeza que pretende eliminar este PDF?')) {
+        const pdfs = JSON.parse(localStorage.getItem('uploadedPDFs') || '[]');
+        const updatedPDFs = pdfs.filter(p => p.id != pdfId);
+        localStorage.setItem('uploadedPDFs', JSON.stringify(updatedPDFs));
+        loadUploadedPDFs();
+        showMessage('PDF eliminado com sucesso!', 'success');
     }
 }
 

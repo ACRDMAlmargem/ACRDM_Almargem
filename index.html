@@ -17,6 +17,14 @@
                 <div class="header-text">
                     <h1>Associação Cultural e Recreativa dos Moradores de Almargem</h1>
                 </div>
+                <div class="header-actions">
+                    <button id="adminLoginBtn" class="btn btn-small admin-only" style="display: none;">
+                        <i class="fas fa-user-shield"></i> Admin
+                    </button>
+                    <button id="adminLogoutBtn" class="btn btn-small btn-secondary admin-only" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
                             </div>
         </div>
     </header>
@@ -38,6 +46,9 @@
                 </li>
                 <li class="nav-item" data-tab="reservas">
                     <i class="fas fa-utensils"></i> Reservas
+                </li>
+                <li class="nav-item admin-only" data-tab="administracao" style="display: none;">
+                    <i class="fas fa-cog"></i> Administração
                 </li>
             </ul>
         </div>
@@ -368,6 +379,119 @@
                     <h3>Reservas Atuais</h3>
                     <div id="reservasList">
                         <!-- Reservas serão adicionadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Separador de Administração -->
+        <section id="administracao" class="tab-content">
+            <h2>Administração</h2>
+            
+            <!-- Login de Administrador -->
+            <div id="adminLogin" class="admin-login">
+                <h3>Login de Administrador</h3>
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="adminUsername">Utilizador:</label>
+                        <input type="text" id="adminUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Password:</label>
+                        <input type="password" id="adminPassword" required>
+                    </div>
+                    <button type="submit" class="btn">Entrar</button>
+                </form>
+            </div>
+
+            <!-- Painel de Administração -->
+            <div id="adminPanel" class="admin-panel" style="display: none;">
+                <div class="admin-header">
+                    <h3>Painel de Administração</h3>
+                    <button id="adminLogout" class="btn btn-secondary">Sair</button>
+                </div>
+
+                <!-- Configurações de Separadores -->
+                <div class="admin-section">
+                    <h4>Configurações de Separadores</h4>
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <label>
+                                <input type="checkbox" id="toggleRelatorios">
+                                <span>Relatórios</span>
+                            </label>
+                        </div>
+                        <div class="config-item">
+                            <label>
+                                <input type="checkbox" id="togglePublicacoes">
+                                <span>Publicações</span>
+                            </label>
+                        </div>
+                        <div class="config-item">
+                            <label>
+                                <input type="checkbox" id="toggleSocios">
+                                <span>Sócios</span>
+                            </label>
+                        </div>
+                        <div class="config-item">
+                            <label>
+                                <input type="checkbox" id="toggleReservas">
+                                <span>Reservas</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button id="saveConfig" class="btn">Guardar Configurações</button>
+                </div>
+
+                <!-- Upload de PDFs -->
+                <div class="admin-section">
+                    <h4>Upload de Relatórios PDF</h4>
+                    <form id="pdfUploadForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pdfTipo">Tipo de Relatório *</label>
+                                <select id="pdfTipo" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="balancete">Balancete</option>
+                                    <option value="relatorio_anual">Relatório Anual</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pdfMes">Mês *</label>
+                                <select id="pdfMes" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="01">Janeiro</option>
+                                    <option value="02">Fevereiro</option>
+                                    <option value="03">Março</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Maio</option>
+                                    <option value="06">Junho</option>
+                                    <option value="07">Julho</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pdfAno">Ano *</label>
+                                <input type="number" id="pdfAno" min="2020" max="2030" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pdfFile">Ficheiro PDF *</label>
+                            <input type="file" id="pdfFile" accept=".pdf" required>
+                        </div>
+                        <button type="submit" class="btn">Upload PDF</button>
+                    </form>
+                </div>
+
+                <!-- Lista de PDFs Carregados -->
+                <div class="admin-section">
+                    <h4>Relatórios Carregados</h4>
+                    <div id="pdfsList" class="pdfs-list">
+                        <!-- PDFs serão listados aqui -->
                     </div>
                 </div>
             </div>
