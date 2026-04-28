@@ -50,10 +50,7 @@
   </g>
   
   <!-- Text -->
-  <text x="50" y="82" font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="url(#accentGradient)">
+  <text x="50" y="98" font-family="Arial, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="url(#accentGradient)">
     ACRDM
-  </text>
-  <text x="50" y="92" font-family="Arial, sans-serif" font-size="7" font-weight="bold" text-anchor="middle" fill="#2E7D32">
-    ALMARGEM
   </text>
 </svg>
