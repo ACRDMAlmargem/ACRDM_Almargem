@@ -45,7 +45,8 @@ header h1 {
     margin: 0;
     font-weight: 700;
     text-align: center;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
 }
 
 header .logo-circle-header {
@@ -1185,44 +1186,89 @@ footer p {
 
 /* Responsive */
 @media (max-width: 768px) {
-    header h1 {
-        font-size: 1.8rem;
+    /* Header */
+    header {
+        padding: 1rem 0;
     }
-    
+
+    header .header-content {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+
+    header h1 {
+        font-size: 1.3rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    header .logo-circle-header {
+        width: 80px;
+        height: 80px;
+        margin-right: 0.5rem;
+    }
+
+    header .logo-circle-header img {
+        width: 56px;
+        height: 56px;
+    }
+
+    /* Nav */
     .nav-tabs {
         flex-direction: column;
     }
-    
+
     .nav-item {
         justify-content: center;
     }
-    
+
+    /* Layouts */
     .reservas-container {
         grid-template-columns: 1fr;
     }
-    
+
     .contact-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .publicacoes-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .socios-stats {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 480px) {
-    .container {
-        padding: 0 15px;
+    /* Header ainda mais compacto */
+    header {
+        padding: 0.75rem 0;
     }
-    
+
+    header h1 {
+        font-size: 1.05rem;
+    }
+
+    header .logo-circle-header {
+        width: 60px;
+        height: 60px;
+    }
+
+    header .logo-circle-header img {
+        width: 42px;
+        height: 42px;
+    }
+
+    .container {
+        padding: 0 12px;
+    }
+
     .nav-item {
         padding: 0.75rem 1rem;
     }
-    
+
     .contact-card,
     .reports-container,
     .publicacoes-container,
