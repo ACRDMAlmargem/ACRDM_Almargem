@@ -18,16 +18,21 @@ function initializeTabs() {
     navItems.forEach(item => {
         item.addEventListener('click', function() {
             const targetTab = this.getAttribute('data-tab');
-            
-            // Remover classe active de todos os itens
             navItems.forEach(nav => nav.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Adicionar classe active ao item clicado
             this.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
         });
     });
+
+    // Garantir que o tab activo no nav tem o conteúdo visível (fix para carregamento via link externo)
+    const activeNav = document.querySelector('.nav-item.active');
+    if (activeNav) {
+        const targetTab = activeNav.getAttribute('data-tab');
+        tabContents.forEach(content => content.classList.remove('active'));
+        const targetContent = document.getElementById(targetTab);
+        if (targetContent) targetContent.classList.add('active');
+    }
 }
 
 // Inicialização de dados
