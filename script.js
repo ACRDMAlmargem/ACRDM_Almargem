@@ -1072,7 +1072,7 @@ function uploadPDF() {
     const tipo = document.getElementById('pdfTipo').value;
     const mes = document.getElementById('pdfMes').value;
     const ano = document.getElementById('pdfAno').value;
-    const pdfFile = document.getElementById('pdfFile').files[0];
+    const pdfFile = document.getElementById('adminPdfFile').files[0];
 
     if (!tipo || !mes || !ano || !pdfFile) {
         showMessage('Por favor, preencha todos os campos obrigatórios!', 'error');
@@ -1116,7 +1116,14 @@ function loadUploadedPDFs() {
             const pdfItem = document.createElement('div');
             pdfItem.className = 'pdf-item';
             
-            const tipoText = pdf.tipo === 'balancete' ? 'Balancete' : 'Relatório Anual';
+            const tipoLabels = {
+                balancete: 'Balancete',
+                relatorio_anual: 'Relatório Anual',
+                extrato: 'Extrato',
+                rcbe: 'RCBE',
+                doc_legal_fiscal: 'Documentação Legal/Fiscal'
+            };
+            const tipoText = tipoLabels[pdf.tipo] || pdf.tipo;
             const mesText = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][parseInt(pdf.mes)];
             
             pdfItem.innerHTML = `
