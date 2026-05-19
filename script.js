@@ -842,6 +842,7 @@ function initializeAdministration() {
             if (username === 'admin' && password === 'acrdm2026') {
                 localStorage.setItem('isAdmin', 'true');
                 showAdminPanel();
+                loadTabConfigurations();
                 showMessage('Login realizado com sucesso!', 'success');
             } else {
                 showMessage('Credenciais inválidas!', 'error');
@@ -892,24 +893,17 @@ function initializeAdministration() {
 
 function checkAdminStatus() {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    
-    // Mostrar botões de login/logout no header
-    const adminLoginBtn = document.getElementById('adminLoginBtn');
-    const adminLogoutBtn = document.getElementById('adminLogoutBtn');
-    
-    if (adminLoginBtn && adminLogoutBtn) {
-        if (isAdmin) {
-            adminLoginBtn.style.display = 'none';
-            adminLogoutBtn.style.display = 'block';
-        } else {
-            adminLoginBtn.style.display = 'block';
-            adminLogoutBtn.style.display = 'none';
-        }
-    }
-    
+
     if (isAdmin) {
+        // showAdminPanel trata dos botões do header internamente
         showAdminPanel();
+    } else {
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+        if (adminLoginBtn)  adminLoginBtn.style.display  = 'block';
+        if (adminLogoutBtn) adminLogoutBtn.style.display = 'none';
     }
+
     loadTabConfigurations();
     loadUploadedPDFs();
 }
@@ -918,13 +912,19 @@ function showAdminPanel() {
     const adminLogin = document.getElementById('adminLogin');
     const adminPanel = document.getElementById('adminPanel');
     const adminOnlyItems = document.querySelectorAll('.admin-only');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminLogoutBtn = document.getElementById('adminLogoutBtn');
 
     if (adminLogin) adminLogin.style.display = 'none';
     if (adminPanel) adminPanel.style.display = 'block';
-    
+
     adminOnlyItems.forEach(item => {
         item.style.display = 'block';
     });
+
+    // Corrigir botões do header: login oculto, logout visível
+    if (adminLoginBtn)  adminLoginBtn.style.display  = 'none';
+    if (adminLogoutBtn) adminLogoutBtn.style.display = 'block';
 }
 
 function hideAdminPanel() {
@@ -1051,21 +1051,42 @@ function loadTabConfigurations() {
 
 function applyTabConfigurations(config) {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    
-    if (!isAdmin) {
-        const tabs = {
-            relatorios: document.querySelector('[data-tab="relatorios"]'),
-            publicacoes: document.querySelector('[data-tab="publicacoes"]'),
-            socios: document.querySelector('[data-tab="socios"]'),
-            reservas: document.querySelector('[data-tab="reservas"]')
-        };
 
-        Object.keys(tabs).forEach(tabName => {
-            if (tabs[tabName]) {
-                tabs[tabName].style.display = config[tabName] ? 'block' : 'none';
+    const tabMap = {
+        relatorios: document.querySelector('[data-tab="relatorios"]'),
+        publicacoes: document.querySelector('[data-tab="publicacoes"]'),
+        socios:     document.querySelector('[data-tab="socios"]'),
+        reservas:   document.querySelector('[data-tab="reservas"]')
+    };
+
+    Object.entries(tabMap).forEach(([name, el]) => {
+        if (!el) return;
+        const visible = config[name] !== false;
+
+        // Remove badge anterior
+        el.querySelector('.tab-hidden-badge')?.remove();
+
+        if (isAdmin) {
+            // Admin vê sempre todos os separadores;
+            // os ocultos ficam com opacidade reduzida + ícone de aviso
+            el.style.display = 'block';
+            el.style.opacity = visible ? '1' : '0.45';
+            el.title = visible ? '' : 'Oculto para visitantes';
+            if (!visible) {
+                const badge = document.createElement('span');
+                badge.className = 'tab-hidden-badge';
+                badge.title = 'Oculto para visitantes';
+                badge.style.cssText = 'font-size:0.6em;margin-left:4px;vertical-align:middle;';
+                badge.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                el.appendChild(badge);
             }
-        });
-    }
+        } else {
+            // Visitantes: aplica a configuração estritamente
+            el.style.display = visible ? '' : 'none';
+            el.style.opacity = '';
+            el.title = '';
+        }
+    });
 }
 
 function uploadPDF() {
