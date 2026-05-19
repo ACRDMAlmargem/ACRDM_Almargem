@@ -1142,7 +1142,11 @@ function loadUploadedPDFs() {
                 relatorio_anual: 'Relatório Anual',
                 extrato: 'Extrato',
                 rcbe: 'RCBE',
-                doc_legal_fiscal: 'Documentação Legal/Fiscal'
+                doc_legal_fiscal: 'Documentação Legal/Fiscal',
+                estatutos: 'Estatutos',
+                atas: 'Atas',
+                reunioes_internas: 'Reuniões Internas',
+                outros: 'Outros'
             };
             const tipoText = tipoLabels[pdf.tipo] || pdf.tipo;
             const mesText = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][parseInt(pdf.mes)];
