@@ -1037,11 +1037,11 @@ function loadTabConfigurations() {
         
         applyTabConfigurations(config);
     } else {
-        // Configuração padrão
+        // Configuração padrão — apenas Contactos e Relatórios visíveis publicamente
         const defaultConfig = {
             relatorios: true,
-            publicacoes: true,
-            socios: true,
+            publicacoes: false,
+            socios: false,
             reservas: false
         };
         
