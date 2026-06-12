@@ -1065,6 +1065,16 @@ main {
     font-size: 0.9rem;
 }
 
+.btn-danger {
+    background: #c0392b;
+    color: white;
+    border: none;
+}
+.btn-danger:hover {
+    background: #a93226;
+    color: white;
+}
+
 /* Modal */
 .modal {
     display: none;

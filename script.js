@@ -93,7 +93,15 @@ function initializeReports() {
     const reportsList = document.getElementById('reportsList');
     if (!reportsList) return;
 
-    reportsList.innerHTML = STATIC_REPORTS.map(r => `
+    const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
+    const visible = STATIC_REPORTS.filter(r => !hidden.includes(r.file));
+
+    if (visible.length === 0) {
+        reportsList.innerHTML = '<p style="color:#606060;padding:1rem;">Sem relatórios disponíveis.</p>';
+        return;
+    }
+
+    reportsList.innerHTML = visible.map(r => `
         <div class="report-card">
             <div class="report-info">
                 <h4>${r.titulo}${r.tag ? ` <span class="report-tag">${r.tag}</span>` : ''}</h4>
@@ -110,6 +118,61 @@ function initializeReports() {
             </div>
         </div>
     `).join('');
+}
+
+function renderAdminDocs() {
+    const list = document.getElementById('adminDocsList');
+    if (!list) return;
+
+    const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
+
+    if (STATIC_REPORTS.length === 0) {
+        list.innerHTML = '<p style="color:#606060;font-size:0.85rem;">Nenhum documento configurado.</p>';
+        return;
+    }
+
+    list.innerHTML = STATIC_REPORTS.map(r => {
+        const isHidden = hidden.includes(r.file);
+        return `
+        <div class="pdf-item" style="${isHidden ? 'opacity:0.5;' : ''}">
+            <div>
+                <strong>${r.titulo}</strong>${isHidden ? ' <em style="color:#c0392b;font-size:0.8rem;">(eliminado)</em>' : ''}
+                <br><small>${r.periodo} &nbsp;·&nbsp; ${r.data}</small>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                <button onclick="viewReport('./${r.file}')" class="btn btn-small">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
+                ${isHidden
+                    ? `<button onclick="restoreReport('${r.file}')" class="btn btn-small btn-secondary">
+                           <i class="fas fa-undo"></i> Restaurar
+                       </button>`
+                    : `<button onclick="hideReport('${r.file}')" class="btn btn-small btn-danger">
+                           <i class="fas fa-trash"></i> Eliminar
+                       </button>`
+                }
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function hideReport(file) {
+    if (!confirm('Tem a certeza que pretende eliminar este documento do separador público?')) return;
+    const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
+    if (!hidden.includes(file)) hidden.push(file);
+    localStorage.setItem('hiddenReports', JSON.stringify(hidden));
+    initializeReports();
+    renderAdminDocs();
+    showMessage('Documento eliminado do separador público.', 'success');
+}
+
+function restoreReport(file) {
+    const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
+    const updated = hidden.filter(f => f !== file);
+    localStorage.setItem('hiddenReports', JSON.stringify(updated));
+    initializeReports();
+    renderAdminDocs();
+    showMessage('Documento restaurado no separador público.', 'success');
 }
 
 function populateMonthSelect() {
@@ -942,6 +1005,8 @@ function showAdminPanel() {
     // Corrigir botões do header: login oculto, logout visível
     if (adminLoginBtn)  adminLoginBtn.style.display  = 'none';
     if (adminLogoutBtn) adminLogoutBtn.style.display = 'block';
+
+    renderAdminDocs();
 }
 
 function hideAdminPanel() {
