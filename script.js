@@ -83,9 +83,12 @@ function loadStoredData() {
 }
 
 // Sistema de Relatórios
+const GH_OWNER = 'ACRDMAlmargem';
+const GH_REPO  = 'ACRDM_Almargem';
+
 const STATIC_REUNIOES = [
     {
-        titulo: 'Convocatória — Reunião de Direção n.º 1/2026',
+        titulo: 'Convocatória - Reunião de Direção n.º 1/2026',
         data:   '11/06/2026',
         periodo:'20 de Junho de 2026',
         tag:    'Convocatória',
@@ -203,12 +206,95 @@ function restoreReport(file) {
     showMessage('Documento restaurado no separador público.', 'success');
 }
 
+// ── GitHub API helpers ─────────────────────────────────────────────────────
+async function ghGet(token, path) {
+    const r = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`,
+        { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+    );
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(`GitHub ${r.status}: ${(await r.json()).message}`);
+    return r.json();
+}
+
+async function ghPut(token, path, contentB64, message, sha) {
+    const body = { message, content: contentB64, branch: 'main' };
+    if (sha) body.sha = sha;
+    const r = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        }
+    );
+    if (!r.ok) throw new Error(`GitHub ${r.status}: ${(await r.json()).message}`);
+    return r.json();
+}
+
+async function uploadReuniao(pdfFile, meta) {
+    const token = localStorage.getItem('githubToken');
+    if (!token) {
+        showMessage('Configure o Token GitHub nas definições de administrador.', 'error');
+        return;
+    }
+    const btn = document.querySelector('#pdfUploadForm button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'A publicar...'; }
+    try {
+        const filename = pdfFile.name.replace(/\s+/g, '_').replace(/[^\w.-]/g, '');
+        const pdfB64 = await new Promise((res, rej) => {
+            const rd = new FileReader();
+            rd.onload = e => res(e.target.result.split(',')[1]);
+            rd.onerror = rej;
+            rd.readAsDataURL(pdfFile);
+        });
+        const existingPdf = await ghGet(token, filename);
+        await ghPut(token, filename, pdfB64, `docs: upload ${filename}`, existingPdf?.sha);
+
+        const existingJson = await ghGet(token, 'reunioes.json');
+        let reunioes = existingJson
+            ? JSON.parse(atob(existingJson.content.replace(/[\r\n]/g, '')))
+            : [];
+        reunioes = reunioes.filter(r => r.file !== filename);
+        reunioes.unshift({ titulo: meta.titulo, data: meta.data, periodo: meta.periodo, tag: meta.tag || null, file: filename });
+        const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(reunioes, null, 2))));
+        await ghPut(token, 'reunioes.json', jsonB64, `docs: reunioes.json add ${filename}`, existingJson?.sha);
+
+        document.getElementById('pdfUploadForm').reset();
+        toggleReuniaoFields();
+        showMessage('Documento publicado! Visível para todos em ~30 segundos.', 'success');
+        setTimeout(() => initializeReunioes(), 8000);
+    } catch (e) {
+        showMessage(`Erro: ${e.message}`, 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Upload PDF'; }
+    }
+}
+
+function toggleReuniaoFields() {
+    const tipo = document.getElementById('pdfTipo').value;
+    const isR = tipo === 'reunioes_direcao';
+    const rf = document.getElementById('reuniaoFields');
+    const mf = document.getElementById('mesAnoFields');
+    if (rf) rf.style.display = isR ? 'block' : 'none';
+    if (mf) mf.style.display = isR ? 'none' : 'flex';
+}
+
 // ── Reuniões de Direção ────────────────────────────────────────────────────
-function initializeReunioes() {
+async function initializeReunioes() {
     const list = document.getElementById('reunioesList');
     if (!list) return;
+    let reunioes = STATIC_REUNIOES;
+    try {
+        const r = await fetch(`reunioes.json?cb=${Date.now()}`);
+        if (r.ok) reunioes = await r.json();
+    } catch (e) { /* fallback to STATIC_REUNIOES */ }
     const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
-    const visible = STATIC_REUNIOES.filter(r => !hidden.includes(r.file));
+    const visible = reunioes.filter(r => !hidden.includes(r.file));
     if (visible.length === 0) {
         list.innerHTML = '<p style="color:#606060;padding:1rem;">Sem documentos disponíveis.</p>';
         return;
@@ -1116,6 +1202,23 @@ function showAdminPanel() {
 
     renderAdminDocs();
     renderAdminReunioes();
+    // Carregar token guardado
+    const savedToken = localStorage.getItem('githubToken');
+    const tokenInput = document.getElementById('githubTokenInput');
+    const tokenStatus = document.getElementById('githubTokenStatus');
+    if (tokenInput && savedToken) {
+        tokenInput.value = savedToken;
+        if (tokenStatus) tokenStatus.textContent = '✓ Token configurado';
+    }
+}
+
+function saveGithubToken() {
+    const val = (document.getElementById('githubTokenInput') || {}).value?.trim();
+    const status = document.getElementById('githubTokenStatus');
+    if (!val) { if (status) status.textContent = 'Token vazio — não guardado.'; return; }
+    localStorage.setItem('githubToken', val);
+    if (status) status.textContent = '✓ Token guardado com sucesso.';
+    showMessage('Token GitHub guardado.', 'success');
 }
 
 function hideAdminPanel() {
@@ -1282,36 +1385,49 @@ function applyTabConfigurations(config) {
 
 function uploadPDF() {
     const tipo = document.getElementById('pdfTipo').value;
-    const mes = document.getElementById('pdfMes').value;
-    const ano = document.getElementById('pdfAno').value;
     const pdfFile = document.getElementById('adminPdfFile').files[0];
 
-    if (!tipo || !mes || !ano || !pdfFile) {
-        showMessage('Por favor, preencha todos os campos obrigatórios!', 'error');
+    if (!tipo || !pdfFile) {
+        showMessage('Por favor, selecione o tipo e o ficheiro PDF.', 'error');
         return;
     }
 
+    // Reuniões de Direção → publica no GitHub (visível para todos)
+    if (tipo === 'reunioes_direcao') {
+        const titulo  = (document.getElementById('reuniaoTitulo')  || {}).value?.trim();
+        const periodo = (document.getElementById('reuniaoPeriodo') || {}).value?.trim();
+        const tag     = (document.getElementById('reuniaoTag')     || {}).value || null;
+        if (!titulo || !periodo) {
+            showMessage('Preencha o título e a data da reunião.', 'error');
+            return;
+        }
+        const hoje = new Date().toLocaleDateString('pt-PT');
+        uploadReuniao(pdfFile, { titulo, periodo, tag, data: hoje });
+        return;
+    }
+
+    // Outros tipos → localStorage (apenas local)
+    const mes = document.getElementById('pdfMes').value;
+    const ano = document.getElementById('pdfAno').value;
+    if (!mes || !ano) {
+        showMessage('Por favor, preencha todos os campos obrigatórios!', 'error');
+        return;
+    }
     const reader = new FileReader();
     reader.onload = function(e) {
         const pdfData = {
-            id: Date.now(),
-            tipo: tipo,
-            mes: mes,
-            ano: ano,
+            id: Date.now(), tipo, mes, ano,
             nome: pdfFile.name,
             data: e.target.result,
             dataUpload: new Date().toISOString()
         };
-
         const pdfs = JSON.parse(localStorage.getItem('uploadedPDFs') || '[]');
         pdfs.push(pdfData);
         localStorage.setItem('uploadedPDFs', JSON.stringify(pdfs));
-
         document.getElementById('pdfUploadForm').reset();
         loadUploadedPDFs();
         showMessage('PDF carregado com sucesso!', 'success');
     };
-
     reader.readAsDataURL(pdfFile);
 }
 

@@ -472,30 +472,71 @@
                     <button id="saveConfig" class="btn">Guardar Configurações</button>
                 </div>
 
+                <!-- Token GitHub -->
+                <div class="admin-section">
+                    <h4>Token GitHub (publicação de documentos)</h4>
+                    <p style="color:#606060;font-size:0.85rem;margin-bottom:0.75rem;">
+                        Necessário para publicar documentos de reuniões visíveis a todos. Gere em
+                        <strong>GitHub → Settings → Developer Settings → Personal Access Tokens → repo</strong>.
+                    </p>
+                    <div class="form-row" style="align-items:flex-end;gap:0.5rem;">
+                        <div class="form-group" style="flex:1;">
+                            <label for="githubTokenInput">Token (fica guardado localmente)</label>
+                            <input type="password" id="githubTokenInput" placeholder="ghp_..." autocomplete="off">
+                        </div>
+                        <button type="button" class="btn" onclick="saveGithubToken()">Guardar</button>
+                    </div>
+                    <small id="githubTokenStatus" style="color:#606060;"></small>
+                </div>
+
                 <!-- Upload de PDFs -->
                 <div class="admin-section">
                     <h4>Upload de Relatórios PDF</h4>
                     <form id="pdfUploadForm">
-                        <div class="form-row">
+                        <div class="form-group">
+                            <label for="pdfTipo">Tipo de Relatório *</label>
+                            <select id="pdfTipo" required onchange="toggleReuniaoFields()">
+                                <option value="">Selecione...</option>
+                                <option value="reunioes_direcao">📋 Reuniões de Direção (público)</option>
+                                <option value="balancete">Balancete</option>
+                                <option value="relatorio_anual">Relatório Anual</option>
+                                <option value="extrato">Extrato</option>
+                                <option value="rcbe">RCBE</option>
+                                <option value="doc_legal_fiscal">Documentação Legal/Fiscal</option>
+                                <option value="estatutos">Estatutos</option>
+                                <option value="atas">Atas</option>
+                                <option value="reunioes_internas">Reuniões Internas</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+
+                        <!-- Campos específicos para Reuniões de Direção -->
+                        <div id="reuniaoFields" style="display:none;">
                             <div class="form-group">
-                                <label for="pdfTipo">Tipo de Relatório *</label>
-                                <select id="pdfTipo" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="balancete">Balancete</option>
-                                    <option value="relatorio_anual">Relatório Anual</option>
-                                    <option value="extrato">Extrato</option>
-                                    <option value="rcbe">RCBE</option>
-                                    <option value="doc_legal_fiscal">Documentação Legal/Fiscal</option>
-                                    <option value="estatutos">Estatutos</option>
-                                    <option value="atas">Atas</option>
-                                    <option value="reunioes_direcao">Reuniões de Direção</option>
-                                    <option value="reunioes_internas">Reuniões Internas</option>
-                                    <option value="outros">Outros</option>
-                                </select>
+                                <label for="reuniaoTitulo">Título do documento *</label>
+                                <input type="text" id="reuniaoTitulo" placeholder="ex: Convocatória - Reunião de Direção n.º 2/2026">
                             </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="reuniaoPeriodo">Data da reunião *</label>
+                                    <input type="text" id="reuniaoPeriodo" placeholder="ex: 20 de Setembro de 2026">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reuniaoTag">Tipo de documento</label>
+                                    <select id="reuniaoTag">
+                                        <option value="Convocatória">Convocatória</option>
+                                        <option value="Ata">Ata</option>
+                                        <option value="">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos Mês/Ano (outros tipos) -->
+                        <div id="mesAnoFields" class="form-row">
                             <div class="form-group">
                                 <label for="pdfMes">Mês *</label>
-                                <select id="pdfMes" required>
+                                <select id="pdfMes">
                                     <option value="">Selecione...</option>
                                     <option value="01">Janeiro</option>
                                     <option value="02">Fevereiro</option>
@@ -513,9 +554,10 @@
                             </div>
                             <div class="form-group">
                                 <label for="pdfAno">Ano *</label>
-                                <input type="number" id="pdfAno" min="2020" max="2030" required>
+                                <input type="number" id="pdfAno" min="2020" max="2030">
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label for="adminPdfFile">Ficheiro PDF *</label>
                             <input type="file" id="adminPdfFile" accept=".pdf" required>
