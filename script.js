@@ -6,8 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const validHidden = hidden.filter(f => knownFiles.includes(f));
     localStorage.setItem('hiddenReports', JSON.stringify(validHidden));
 
+    const knownReunioes = STATIC_REUNIOES.map(r => r.file);
+    const hiddenR = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
+    localStorage.setItem('hiddenReunioes', JSON.stringify(hiddenR.filter(f => knownReunioes.includes(f))));
+
     initializeTabs();
     initializeReports();
+    initializeReunioes();
     initializePublicacoes();
     initializeSocios();
     initializeReservas();
@@ -78,6 +83,16 @@ function loadStoredData() {
 }
 
 // Sistema de Relatórios
+const STATIC_REUNIOES = [
+    {
+        titulo: 'Convocatória — Reunião de Direção n.º 1/2026',
+        data:   '11/06/2026',
+        periodo:'20 de Junho de 2026',
+        tag:    'Convocatória',
+        file:   'Convocatoria_Reuniao_20062026.pdf'
+    }
+];
+
 const STATIC_REPORTS = [
     {
         titulo: 'Balancete (Provisório) - 2.º Trimestre 2026',
@@ -185,6 +200,86 @@ function restoreReport(file) {
     localStorage.setItem('hiddenReports', JSON.stringify(updated));
     initializeReports();
     renderAdminDocs();
+    showMessage('Documento restaurado no separador público.', 'success');
+}
+
+// ── Reuniões de Direção ────────────────────────────────────────────────────
+function initializeReunioes() {
+    const list = document.getElementById('reunioesList');
+    if (!list) return;
+    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
+    const visible = STATIC_REUNIOES.filter(r => !hidden.includes(r.file));
+    if (visible.length === 0) {
+        list.innerHTML = '<p style="color:#606060;padding:1rem;">Sem documentos disponíveis.</p>';
+        return;
+    }
+    list.innerHTML = visible.map(r => `
+        <div class="report-card">
+            <div class="report-info">
+                <h4>${r.titulo}${r.tag ? ` <span class="report-tag">${r.tag}</span>` : ''}</h4>
+                <p><strong>Data:</strong> ${r.periodo}</p>
+                <p><strong>Publicado:</strong> ${r.data}</p>
+            </div>
+            <div class="report-actions">
+                <button onclick="viewReport('./${r.file}')" class="btn btn-small">
+                    <i class="fas fa-eye"></i> Visualizar
+                </button>
+                <button onclick="downloadReport('${r.file}')" class="btn btn-small btn-secondary">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderAdminReunioes() {
+    const list = document.getElementById('adminReunioesList');
+    if (!list) return;
+    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
+    if (STATIC_REUNIOES.length === 0) {
+        list.innerHTML = '<p style="color:#606060;font-size:0.85rem;">Nenhum documento configurado.</p>';
+        return;
+    }
+    list.innerHTML = STATIC_REUNIOES.map(r => {
+        const isHidden = hidden.includes(r.file);
+        return `
+        <div class="pdf-item" style="${isHidden ? 'opacity:0.5;' : ''}">
+            <div>
+                <strong>${r.titulo}</strong>${isHidden ? ' <em style="color:#c0392b;font-size:0.8rem;">(eliminado)</em>' : ''}
+                <br><small>${r.periodo} &nbsp;·&nbsp; ${r.data}</small>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                <button onclick="viewReport('./${r.file}')" class="btn btn-small">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
+                ${isHidden
+                    ? `<button onclick="restoreReuniao('${r.file}')" class="btn btn-small btn-secondary">
+                           <i class="fas fa-undo"></i> Restaurar
+                       </button>`
+                    : `<button onclick="hideReuniao('${r.file}')" class="btn btn-small btn-danger">
+                           <i class="fas fa-trash"></i> Eliminar
+                       </button>`
+                }
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function hideReuniao(file) {
+    if (!confirm('Tem a certeza que pretende eliminar este documento do separador público?')) return;
+    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
+    if (!hidden.includes(file)) hidden.push(file);
+    localStorage.setItem('hiddenReunioes', JSON.stringify(hidden));
+    initializeReunioes();
+    renderAdminReunioes();
+    showMessage('Documento eliminado do separador público.', 'success');
+}
+
+function restoreReuniao(file) {
+    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
+    localStorage.setItem('hiddenReunioes', JSON.stringify(hidden.filter(f => f !== file)));
+    initializeReunioes();
+    renderAdminReunioes();
     showMessage('Documento restaurado no separador público.', 'success');
 }
 
@@ -1020,6 +1115,7 @@ function showAdminPanel() {
     if (adminLogoutBtn) adminLogoutBtn.style.display = 'block';
 
     renderAdminDocs();
+    renderAdminReunioes();
 }
 
 function hideAdminPanel() {
