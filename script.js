@@ -1,5 +1,11 @@
 // Inicialização quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
+    // Limpar relatórios ocultos e uploads antigos ao reiniciar com nova lista de documentos
+    const knownFiles = STATIC_REPORTS.map(r => r.file);
+    const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
+    const validHidden = hidden.filter(f => knownFiles.includes(f));
+    localStorage.setItem('hiddenReports', JSON.stringify(validHidden));
+
     initializeTabs();
     initializeReports();
     initializePublicacoes();
@@ -74,18 +80,25 @@ function loadStoredData() {
 // Sistema de Relatórios
 const STATIC_REPORTS = [
     {
-        titulo: 'Balancete (Provisório - Junho 2026)',
-        data:   '11/06/2026',
+        titulo: 'Balancete (Provisório) - 2.º Trimestre 2026',
+        data:   '12/06/2026',
         periodo:'2.º Trimestre 2026 (Abr – Jun)',
         tag:    'Provisório',
-        file:   'Balancete_Jun2026_Provisorio.pdf'
+        file:   'Balancete_2Tri_2026_Provisorio.pdf'
     },
     {
-        titulo: 'Balancete - Março 2026',
-        data:   '31/03/2026',
+        titulo: 'Balancete Retificativo - 1.º Trimestre 2026',
+        data:   '12/06/2026',
+        periodo:'1.º Trimestre 2026 (Jan – Mar)',
+        tag:    'Retificativo',
+        file:   'Balancete_Retificativo_1Tri_2026.pdf'
+    },
+    {
+        titulo: 'Extrato Bancário - Março 2026',
+        data:   '01/04/2026',
         periodo:'1.º Trimestre 2026 (Jan – Mar)',
         tag:    null,
-        file:   'Balancete.pdf'
+        file:   'Extracto_Marco_2026.pdf'
     }
 ];
 
