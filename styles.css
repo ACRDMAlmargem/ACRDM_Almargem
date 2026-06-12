@@ -323,6 +323,78 @@ main {
     box-shadow: 0 4px 12px rgba(52, 116, 116, 0.15);
 }
 
+.report-card {
+    background: white;
+    border: 1px solid #d1e8e8;
+    border-left: 5px solid #2A6762;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(42,103,98,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 18px rgba(42,103,98,0.15);
+}
+
+.report-info h4 {
+    color: #2A6762;
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.report-info p {
+    color: #666;
+    font-size: 0.875rem;
+    margin: 0.15rem 0;
+}
+
+.report-tag {
+    background: #FFF3CD;
+    color: #7F3F00;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    border: 1px solid #CC7A00;
+    vertical-align: middle;
+}
+
+.report-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.btn-small {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.85rem;
+    border-radius: 20px;
+}
+
+@media (max-width: 600px) {
+    .report-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .report-actions {
+        width: 100%;
+    }
+    .report-actions .btn {
+        flex: 1;
+        text-align: center;
+    }
+}
+
 .balancete-item {
     background: white;
     border: 1px solid #d1e8e8;

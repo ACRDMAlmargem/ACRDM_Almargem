@@ -72,24 +72,44 @@ function loadStoredData() {
 }
 
 // Sistema de Relatórios
-function initializeReports() {
-    // Mostrar apenas o Balancete - Março 2026
-    const reportsList = document.getElementById('reportsList');
-    
-    if (reportsList) {
-        reportsList.innerHTML = `
-            <div class="report-card">
-                <div class="report-info">
-                    <h4>Balancete - Março 2026</h4>
-                    <p><strong>Data:</strong> 31/03/2026</p>
-                </div>
-                <div class="report-actions">
-                    <button onclick="viewReport('./Balancete.pdf')" class="btn btn-small">Visualizar</button>
-                    <button onclick="downloadReport('Balancete.pdf')" class="btn btn-small btn-secondary">Exportar PDF</button>
-                </div>
-            </div>
-        `;
+const STATIC_REPORTS = [
+    {
+        titulo: 'Balancete (Provisório - Junho 2026)',
+        data:   '11/06/2026',
+        periodo:'2.º Trimestre 2026 (Abr – Jun)',
+        tag:    'Provisório',
+        file:   'Balancete_Jun2026_Provisorio.pdf'
+    },
+    {
+        titulo: 'Balancete - Março 2026',
+        data:   '31/03/2026',
+        periodo:'1.º Trimestre 2026 (Jan – Mar)',
+        tag:    null,
+        file:   'Balancete.pdf'
     }
+];
+
+function initializeReports() {
+    const reportsList = document.getElementById('reportsList');
+    if (!reportsList) return;
+
+    reportsList.innerHTML = STATIC_REPORTS.map(r => `
+        <div class="report-card">
+            <div class="report-info">
+                <h4>${r.titulo}${r.tag ? ` <span class="report-tag">${r.tag}</span>` : ''}</h4>
+                <p><strong>Período:</strong> ${r.periodo}</p>
+                <p><strong>Data:</strong> ${r.data}</p>
+            </div>
+            <div class="report-actions">
+                <button onclick="viewReport('./${r.file}')" class="btn btn-small">
+                    <i class="fas fa-eye"></i> Visualizar
+                </button>
+                <button onclick="downloadReport('${r.file}')" class="btn btn-small btn-secondary">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+        </div>
+    `).join('');
 }
 
 function populateMonthSelect() {
@@ -808,24 +828,16 @@ function exportData() {
 
 // Função para visualizar PDF
 function viewReport(fileUrl) {
-    if (fileUrl === './Balancete.pdf') {
-        window.open(fileUrl, '_blank');
-    } else {
-        showMessage('PDF não encontrado', 'error');
-    }
+    window.open(fileUrl, '_blank');
 }
 
 // Função para fazer download do PDF
 function downloadReport(fileName) {
-    if (fileName === 'Balancete.pdf') {
-        const link = document.createElement('a');
-        link.href = './Balancete.pdf';
-        link.download = fileName;
-        link.click();
-        showMessage('Download iniciado', 'success');
-    } else {
-        showMessage('PDF não encontrado', 'error');
-    }
+    const link = document.createElement('a');
+    link.href = './' + fileName;
+    link.download = fileName;
+    link.click();
+    showMessage('Download iniciado', 'success');
 }
 
 // Sistema de Administração
