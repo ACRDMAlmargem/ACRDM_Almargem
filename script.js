@@ -92,7 +92,8 @@ const STATIC_REUNIOES = [
         data:   '11/06/2026',
         periodo:'20 de Junho de 2026',
         tag:    'Convocatória',
-        file:   'Convocatoria_Reuniao_20062026.pdf'
+        file:   'Convocatoria_Reuniao_20062026.pdf',
+        published: true
     }
 ];
 
@@ -124,18 +125,21 @@ function initializeReports() {
     const reportsList = document.getElementById('reportsList');
     if (!reportsList) return;
 
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
     const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
-    const visible = STATIC_REPORTS.filter(r => !hidden.includes(r.file));
+    const list = isAdmin ? STATIC_REPORTS : STATIC_REPORTS.filter(r => !hidden.includes(r.file));
 
-    if (visible.length === 0) {
+    if (list.length === 0) {
         reportsList.innerHTML = '<p style="color:#606060;padding:1rem;">Sem relatórios disponíveis.</p>';
         return;
     }
 
-    reportsList.innerHTML = visible.map(r => `
-        <div class="report-card">
+    reportsList.innerHTML = list.map(r => {
+        const isHidden = hidden.includes(r.file);
+        return `
+        <div class="report-card"${isHidden ? ' style="opacity:0.6;"' : ''}>
             <div class="report-info">
-                <h4>${r.titulo}${r.tag ? ` <span class="report-tag">${r.tag}</span>` : ''}</h4>
+                <h4>${r.titulo}${r.tag ? ` <span class="report-tag">${r.tag}</span>` : ''}${isHidden && isAdmin ? ' <span style="color:#c0392b;font-size:0.75rem;font-weight:normal;margin-left:6px;">(não publicado)</span>' : ''}</h4>
                 <p><strong>Período:</strong> ${r.periodo}</p>
                 <p><strong>Data:</strong> ${r.data}</p>
             </div>
@@ -147,8 +151,8 @@ function initializeReports() {
                     <i class="fas fa-download"></i> Download
                 </button>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function renderAdminDocs() {
@@ -165,9 +169,12 @@ function renderAdminDocs() {
     list.innerHTML = STATIC_REPORTS.map(r => {
         const isHidden = hidden.includes(r.file);
         return `
-        <div class="pdf-item" style="${isHidden ? 'opacity:0.5;' : ''}">
+        <div class="pdf-item" style="${isHidden ? 'opacity:0.55;' : ''}">
             <div>
-                <strong>${r.titulo}</strong>${isHidden ? ' <em style="color:#c0392b;font-size:0.8rem;">(eliminado)</em>' : ''}
+                <strong>${r.titulo}</strong>
+                ${isHidden
+                    ? ' <em style="color:#c0392b;font-size:0.8rem;">(não publicado)</em>'
+                    : ' <em style="color:#27ae60;font-size:0.8rem;">(publicado)</em>'}
                 <br><small>${r.periodo} &nbsp;·&nbsp; ${r.data}</small>
             </div>
             <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
@@ -176,10 +183,10 @@ function renderAdminDocs() {
                 </button>
                 ${isHidden
                     ? `<button onclick="restoreReport('${r.file}')" class="btn btn-small btn-secondary">
-                           <i class="fas fa-undo"></i> Restaurar
+                           <i class="fas fa-globe"></i> Publicar
                        </button>`
                     : `<button onclick="hideReport('${r.file}')" class="btn btn-small btn-danger">
-                           <i class="fas fa-trash"></i> Eliminar
+                           <i class="fas fa-eye-slash"></i> Ocultar
                        </button>`
                 }
             </div>
@@ -188,22 +195,21 @@ function renderAdminDocs() {
 }
 
 function hideReport(file) {
-    if (!confirm('Tem a certeza que pretende eliminar este documento do separador público?')) return;
+    if (!confirm('Ocultar este documento do separador público?')) return;
     const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
     if (!hidden.includes(file)) hidden.push(file);
     localStorage.setItem('hiddenReports', JSON.stringify(hidden));
     initializeReports();
     renderAdminDocs();
-    showMessage('Documento eliminado do separador público.', 'success');
+    showMessage('Documento ocultado do separador público.', 'success');
 }
 
 function restoreReport(file) {
     const hidden = JSON.parse(localStorage.getItem('hiddenReports') || '[]');
-    const updated = hidden.filter(f => f !== file);
-    localStorage.setItem('hiddenReports', JSON.stringify(updated));
+    localStorage.setItem('hiddenReports', JSON.stringify(hidden.filter(f => f !== file)));
     initializeReports();
     renderAdminDocs();
-    showMessage('Documento restaurado no separador público.', 'success');
+    showMessage('Documento publicado no separador público.', 'success');
 }
 
 // ── GitHub API helpers ─────────────────────────────────────────────────────
@@ -259,14 +265,18 @@ async function uploadReuniao(pdfFile, meta) {
         let reunioes = existingJson
             ? JSON.parse(atob(existingJson.content.replace(/[\r\n]/g, '')))
             : [];
+        const publishNow = document.getElementById('reuniaoPublicarAgora')?.checked ?? false;
         reunioes = reunioes.filter(r => r.file !== filename);
-        reunioes.unshift({ titulo: meta.titulo, data: meta.data, periodo: meta.periodo, tag: meta.tag || null, file: filename });
+        reunioes.unshift({ titulo: meta.titulo, data: meta.data, periodo: meta.periodo, tag: meta.tag || null, file: filename, published: publishNow });
         const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(reunioes, null, 2))));
         await ghPut(token, 'reunioes.json', jsonB64, `docs: reunioes.json add ${filename}`, existingJson?.sha);
 
         document.getElementById('pdfUploadForm').reset();
         toggleReuniaoFields();
-        showMessage('Documento publicado! Visível para todos em ~30 segundos.', 'success');
+        showMessage(publishNow
+            ? 'Documento carregado e publicado! Visível para todos em ~30 segundos.'
+            : 'Documento carregado (não publicado). Podes publicá-lo em Gestão de Reuniões.',
+            'success');
         setTimeout(() => initializeReunioes(), 8000);
     } catch (e) {
         showMessage(`Erro: ${e.message}`, 'error');
@@ -293,16 +303,18 @@ async function initializeReunioes() {
         const r = await fetch(`reunioes.json?cb=${Date.now()}`);
         if (r.ok) reunioes = await r.json();
     } catch (e) { /* fallback to STATIC_REUNIOES */ }
-    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
-    const visible = reunioes.filter(r => !hidden.includes(r.file));
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const visible = isAdmin ? reunioes : reunioes.filter(r => r.published !== false);
     if (visible.length === 0) {
         list.innerHTML = '<p style="color:#606060;padding:1rem;">Sem documentos disponíveis.</p>';
         return;
     }
-    list.innerHTML = visible.map(r => `
-        <div class="report-card">
+    list.innerHTML = visible.map(r => {
+        const isUnpublished = r.published === false;
+        return `
+        <div class="report-card"${isUnpublished ? ' style="opacity:0.6;"' : ''}>
             <div class="report-info">
-                <h4>${r.titulo}${r.tag ? ` <span class="report-tag">${r.tag}</span>` : ''}</h4>
+                <h4>${r.titulo}${r.tag ? ` <span class="report-tag">${r.tag}</span>` : ''}${isUnpublished && isAdmin ? ' <span style="color:#c0392b;font-size:0.75rem;font-weight:normal;margin-left:6px;">(não publicado)</span>' : ''}</h4>
                 <p><strong>Data:</strong> ${r.periodo}</p>
                 <p><strong>Publicado:</strong> ${r.data}</p>
             </div>
@@ -314,36 +326,50 @@ async function initializeReunioes() {
                     <i class="fas fa-download"></i> Download
                 </button>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
-function renderAdminReunioes() {
+async function renderAdminReunioes() {
     const list = document.getElementById('adminReunioesList');
     if (!list) return;
-    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
-    if (STATIC_REUNIOES.length === 0) {
+    list.innerHTML = '<p style="color:#606060;font-size:0.85rem;">A carregar...</p>';
+    let reunioes = STATIC_REUNIOES;
+    const token = localStorage.getItem('githubToken');
+    try {
+        if (token) {
+            const existing = await ghGet(token, 'reunioes.json');
+            if (existing) reunioes = JSON.parse(atob(existing.content.replace(/[\r\n]/g, '')));
+        } else {
+            const r = await fetch(`reunioes.json?cb=${Date.now()}`);
+            if (r.ok) reunioes = await r.json();
+        }
+    } catch (e) { /* use fallback */ }
+    if (reunioes.length === 0) {
         list.innerHTML = '<p style="color:#606060;font-size:0.85rem;">Nenhum documento configurado.</p>';
         return;
     }
-    list.innerHTML = STATIC_REUNIOES.map(r => {
-        const isHidden = hidden.includes(r.file);
+    list.innerHTML = reunioes.map(r => {
+        const isPublished = r.published !== false;
         return `
-        <div class="pdf-item" style="${isHidden ? 'opacity:0.5;' : ''}">
+        <div class="pdf-item" style="${!isPublished ? 'opacity:0.55;' : ''}">
             <div>
-                <strong>${r.titulo}</strong>${isHidden ? ' <em style="color:#c0392b;font-size:0.8rem;">(eliminado)</em>' : ''}
+                <strong>${r.titulo}</strong>
+                ${isPublished
+                    ? ' <em style="color:#27ae60;font-size:0.8rem;">(publicado)</em>'
+                    : ' <em style="color:#c0392b;font-size:0.8rem;">(não publicado)</em>'}
                 <br><small>${r.periodo} &nbsp;·&nbsp; ${r.data}</small>
             </div>
             <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
                 <button onclick="viewReport('./${r.file}')" class="btn btn-small">
                     <i class="fas fa-eye"></i> Ver
                 </button>
-                ${isHidden
-                    ? `<button onclick="restoreReuniao('${r.file}')" class="btn btn-small btn-secondary">
-                           <i class="fas fa-undo"></i> Restaurar
+                ${isPublished
+                    ? `<button onclick="togglePublishReuniao('${r.file}', false)" class="btn btn-small btn-danger">
+                           <i class="fas fa-eye-slash"></i> Ocultar
                        </button>`
-                    : `<button onclick="hideReuniao('${r.file}')" class="btn btn-small btn-danger">
-                           <i class="fas fa-trash"></i> Eliminar
+                    : `<button onclick="togglePublishReuniao('${r.file}', true)" class="btn btn-small btn-secondary">
+                           <i class="fas fa-globe"></i> Publicar
                        </button>`
                 }
             </div>
@@ -351,22 +377,26 @@ function renderAdminReunioes() {
     }).join('');
 }
 
-function hideReuniao(file) {
-    if (!confirm('Tem a certeza que pretende eliminar este documento do separador público?')) return;
-    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
-    if (!hidden.includes(file)) hidden.push(file);
-    localStorage.setItem('hiddenReunioes', JSON.stringify(hidden));
-    initializeReunioes();
-    renderAdminReunioes();
-    showMessage('Documento eliminado do separador público.', 'success');
-}
-
-function restoreReuniao(file) {
-    const hidden = JSON.parse(localStorage.getItem('hiddenReunioes') || '[]');
-    localStorage.setItem('hiddenReunioes', JSON.stringify(hidden.filter(f => f !== file)));
-    initializeReunioes();
-    renderAdminReunioes();
-    showMessage('Documento restaurado no separador público.', 'success');
+async function togglePublishReuniao(file, publish) {
+    const token = localStorage.getItem('githubToken');
+    if (!token) {
+        showMessage('Configure o Token GitHub para gerir publicações.', 'error');
+        return;
+    }
+    try {
+        const existing = await ghGet(token, 'reunioes.json');
+        if (!existing) { showMessage('Erro: reunioes.json não encontrado.', 'error'); return; }
+        let reunioes = JSON.parse(atob(existing.content.replace(/[\r\n]/g, '')));
+        reunioes = reunioes.map(r => r.file === file ? { ...r, published: publish } : r);
+        const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(reunioes, null, 2))));
+        await ghPut(token, 'reunioes.json', jsonB64,
+            `docs: ${publish ? 'publicar' : 'ocultar'} ${file}`, existing.sha);
+        showMessage(publish ? 'Documento publicado! Visível em ~30s.' : 'Documento ocultado.', 'success');
+        renderAdminReunioes();
+        setTimeout(() => initializeReunioes(), 4000);
+    } catch (e) {
+        showMessage(`Erro: ${e.message}`, 'error');
+    }
 }
 
 function populateMonthSelect() {
