@@ -100,14 +100,14 @@ const STATIC_REUNIOES = [
 const STATIC_REPORTS = [
     {
         titulo: 'Balancete (Provisório) - 2.º Trimestre 2026',
-        data:   '12/06/2026',
+        data:   '17/06/2026',
         periodo:'2.º Trimestre 2026 (Abr – Jun)',
         tag:    'Provisório',
         file:   'Balancete_2Tri_2026_Provisorio.pdf'
     },
     {
         titulo: 'Balancete Retificativo - 1.º Trimestre 2026',
-        data:   '12/06/2026',
+        data:   '17/06/2026',
         periodo:'1.º Trimestre 2026 (Jan – Mar)',
         tag:    'Retificativo',
         file:   'Balancete_Retificativo_1Tri_2026.pdf'
